@@ -2,13 +2,20 @@ package com.yhsoft.board.api.article.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.yhsoft.board.api.article.dto.CreateArticleRequest;
 import com.yhsoft.board.api.article.dto.CreateArticleResponse;
+import com.yhsoft.board.api.article.dto.GetArticleResponse;
+import com.yhsoft.board.api.article.dto.ListArticleResponse;
+import com.yhsoft.board.api.article.exception.ArticleNotFoundException;
 import com.yhsoft.board.api.article.service.ArticleService;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,5 +113,60 @@ class ArticleControllerTest {
             """));
     // Then
     perform.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("게시글 목록을 조회했을 때 적절한 목록을 보여줘야 함")
+  void getArticlesWithBoardId_withValidBoardId_returnOk() throws Exception {
+    // Given
+    given(articleService.getArticlesWithBoardId(1L, Optional.of(1))).willReturn(
+        new ListArticleResponse(
+            List.of(new ListArticleResponse.Article(1L, "title", "content", "userA",
+                LocalDateTime.now())),
+            true,
+            false
+        )
+    );
+    // When
+    ResultActions perform = mockMvc.perform(
+        get("/api/v1/article").queryParam("boardId", "1").queryParam("page", "1"));
+    // Then
+    perform.andExpect(status().isOk())
+        .andExpect(jsonPath("$.articles").isArray())
+        .andExpect(jsonPath("$.hasPrevious").value(true))
+        .andExpect(jsonPath("$.hasNext").value(false));
+  }
+
+  @Test
+  @DisplayName("적절한 게시글 id로 조회했을 때 해당 게시글 내용을 보여줘야 함")
+  void getArticleByArticleId_withValidArticleId_returnOk() throws Exception {
+    // Given
+    given(articleService.getArticleById(1L)).willReturn(
+        new GetArticleResponse(1L, "title", "content", LocalDateTime.now(), "userA")
+    );
+    // When
+    ResultActions perform = mockMvc.perform(
+        get("/api/v1/article/{articleId}", 1L));
+    // Then
+    perform.andExpect(status().isOk())
+        .andExpect(jsonPath("$.articleId").value(1L))
+        .andExpect(jsonPath("$.title").value("title"))
+        .andExpect(jsonPath("$.content").value("content"))
+        .andExpect(jsonPath("$.createdAt").isNotEmpty())
+        .andExpect(jsonPath("$.username").value("userA"));
+  }
+
+  @Test
+  @DisplayName("존재하지 않은 게시글 id로 조회했을 때 에러가 발생해야 함")
+  void getArticleByArticleId_withInvalidArticleId_raiseError() throws Exception {
+    // Given
+    given(articleService.getArticleById(1L)).willThrow(new ArticleNotFoundException(
+        "게시글을 찾을 수 없습니다."
+    ));
+    // When
+    ResultActions perform = mockMvc.perform(
+        get("/api/v1/article/{:articleId}", 1L));
+    // Then
+    perform.andExpect(status().isNotFound());
   }
 }
