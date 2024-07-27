@@ -1,5 +1,7 @@
 package com.yhsoft.board.domain.user.domain;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -22,7 +24,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class UserEntity {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = IDENTITY)
   private Long userId;
 
   @Column(nullable = false, unique = true)

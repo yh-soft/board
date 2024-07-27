@@ -10,16 +10,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.yhsoft.board.api.board.dto.CreateBoardResponse;
 import com.yhsoft.board.api.board.dto.ListBoardResponse;
 import com.yhsoft.board.api.board.service.BoardService;
+import com.yhsoft.board.security.JwtConfiguration;
+import com.yhsoft.board.security.SpringSecurityConfig;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(BoardController.class)
+@Import({JwtConfiguration.class, SpringSecurityConfig.class})
 @DisplayName("BoardController 테스트")
 class BoardControllerTest {
 
@@ -29,6 +34,7 @@ class BoardControllerTest {
   @MockBean
   private BoardService boardService;
 
+  @WithMockUser(authorities = "ROLE_USER")
   @Test
   @DisplayName("boardName이 없이 보드 생성 요청을 보내는 경우 에러를 발생")
   void addBoardRequest_withoutBoardName_raiseError() throws Exception {
@@ -41,6 +47,7 @@ class BoardControllerTest {
     perform.andExpect(status().isBadRequest());
   }
 
+  @WithMockUser(authorities = "ROLE_USER")
   @Test
   @DisplayName("boardName의 값이 비어있는 경우 에러를 발생")
   void addBoardRequest_withEmptyBoardName_raiseError() throws Exception {
@@ -53,6 +60,7 @@ class BoardControllerTest {
     perform.andExpect(status().isBadRequest());
   }
 
+  @WithMockUser(authorities = "ROLE_USER")
   @Test
   @DisplayName("boardName의 값이 적절한 경우 제대로 된 응답을 전송")
   void addBoardRequest_withNonEmptyBoardName_returnItem() throws Exception {
@@ -69,6 +77,19 @@ class BoardControllerTest {
   }
 
   @Test
+  @DisplayName("로그인을 하지 않은 경우 board 생성 요청에 실패")
+  void addBoardRequest_withoutLogin_throwError() throws Exception {
+    // When
+    ResultActions perform = mockMvc.perform(
+        post("/api/v1/board").contentType(APPLICATION_JSON).content("""
+            {"boardName": "new board"}
+            """));
+    // Then
+    perform.andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(authorities = "ROLE_USER")
+  @Test
   @DisplayName("board 목록이 없는 경우 빈 배열을 반환")
   void getBoards_withEmptyBoard_returnEmptyList() throws Exception {
     // Given
@@ -80,6 +101,7 @@ class BoardControllerTest {
         .andExpect(jsonPath("$.result").isEmpty());
   }
 
+  @WithMockUser(authorities = "ROLE_USER")
   @Test
   @DisplayName("board 목록이 있는 경우 해당 목록을 반환")
   void getBoards_withMultipleBoards_returnList() throws Exception {
@@ -96,5 +118,14 @@ class BoardControllerTest {
         .andExpect(jsonPath("$.result[0].boardName").value("board1"))
         .andExpect(jsonPath("$.result[1].boardId").value(2L))
         .andExpect(jsonPath("$.result[1].boardName").value("board2"));
+  }
+
+  @Test
+  @DisplayName("로그인을 하지 않은 경우 board 목록 조회에 실패")
+  void getBoards_withoutLogin_throwError() throws Exception {
+    // When
+    ResultActions perform = mockMvc.perform(get("/api/v1/board"));
+    // Then
+    perform.andExpect(status().isForbidden());
   }
 }

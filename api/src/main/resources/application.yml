@@ -18,3 +18,7 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: none
+
+jwt:
+  secret-key: Pv5wZb7aNlEEb7zM37l2ZjHDUnGIkTFKoJiAtrfnqRw=
+  expire-timeout: 3600_000
