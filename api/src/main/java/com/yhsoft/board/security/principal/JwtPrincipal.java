@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtPrincipal implements Principal {
 
+  private final Long id;
   private final String name;
   private final String accountType;
 

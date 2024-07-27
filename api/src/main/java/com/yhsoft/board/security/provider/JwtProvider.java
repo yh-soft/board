@@ -27,6 +27,7 @@ public class JwtProvider {
     return Jwts.builder()
         .expiration(new Date(now.getTime() + expireTimeoutMs))
         .issuedAt(now)
+        .claim("id", jwtPrincipal.getId())
         .claim("username", jwtPrincipal.getName())
         .claim("accountType", jwtPrincipal.getAccountType())
         .signWith(secretKey)
@@ -39,6 +40,7 @@ public class JwtProvider {
           .parseSignedClaims(jwtToken);
       Claims payload = claimsJws.getPayload();
       return new JwtPrincipal(
+          payload.get("id", Long.class),
           payload.get("username", String.class),
           payload.get("accountType", String.class)
       );

@@ -40,7 +40,8 @@ public class UserService {
     String username = request.username();
     UserEntity userEntity = userRepository.findByUsername(username)
         .orElseThrow(() -> new LoginFailedException(username + "로 로그인하는데 실파하였습니다."));
-    String jwtToken = jwtProvider.generateToken(new JwtPrincipal(username, "USER"));
+    String jwtToken = jwtProvider.generateToken(
+        new JwtPrincipal(userEntity.getUserId(), username, "USER"));
     if (!passwordEncoder.matches(request.password(), userEntity.getPassword())) {
       throw new LoginFailedException(username + "로 로그인하는데 실파하였습니다.");
     }

@@ -7,15 +7,19 @@ import com.yhsoft.board.api.article.dto.ListArticleResponse;
 import com.yhsoft.board.api.article.exception.ArticleNotFoundException;
 import com.yhsoft.board.domain.article.dao.ArticleRepository;
 import com.yhsoft.board.domain.article.domain.ArticleEntity;
+import com.yhsoft.board.security.principal.JwtPrincipal;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -26,7 +30,11 @@ public class ArticleService {
 
   @Transactional
   public CreateArticleResponse createNewArticle(CreateArticleRequest request) {
-    ArticleEntity entity = request.toEntity();
+    Long userId = ((JwtPrincipal) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal()).getId();
+
+    log.info("userId={}", userId);
+    ArticleEntity entity = request.toEntity(userId);
     ArticleEntity saved = articleRepository.save(entity);
 
     return new CreateArticleResponse(saved.getBoardEntity().getBoardId(), saved.getArticleId());
@@ -43,8 +51,8 @@ public class ArticleService {
   }
 
   public GetArticleResponse getArticleById(Long articleId) {
-    ArticleEntity article = articleRepository.findArticleByArticleId(
-        articleId).orElseThrow(() -> new ArticleNotFoundException("게시글을 찾을 수 없습니다."));
+    ArticleEntity article = articleRepository.findArticleByArticleId(articleId)
+        .orElseThrow(() -> new ArticleNotFoundException("게시글을 찾을 수 없습니다."));
 
     return GetArticleResponse.fromEntity(article);
   }

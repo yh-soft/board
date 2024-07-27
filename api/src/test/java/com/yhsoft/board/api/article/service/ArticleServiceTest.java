@@ -82,7 +82,7 @@ class ArticleServiceTest {
 
     // When
     CreateArticleResponse newArticle = articleService.createNewArticle(
-        new CreateArticleRequest(boardId, "title", "content", userId));
+        new CreateArticleRequest(boardId, "title", "content"));
     // Then
     assertThat(newArticle).hasFieldOrPropertyWithValue("boardId", boardId)
         .hasFieldOrProperty("articleId");
@@ -96,7 +96,7 @@ class ArticleServiceTest {
 
     // When & Then
     assertThatThrownBy(() -> articleService.createNewArticle(
-        new CreateArticleRequest(1L, "title", "content", userId))).isInstanceOf(
+        new CreateArticleRequest(1L, "title", "content"))).isInstanceOf(
         DataIntegrityViolationException.class);
   }
 
@@ -108,7 +108,7 @@ class ArticleServiceTest {
 
     // When & Then
     assertThatThrownBy(() -> articleService.createNewArticle(
-        new CreateArticleRequest(boardId, "title", "content", 1L))).isInstanceOf(
+        new CreateArticleRequest(boardId, "title", "content"))).isInstanceOf(
         DataIntegrityViolationException.class);
   }
 
@@ -122,9 +122,9 @@ class ArticleServiceTest {
 
     for (int i = 0; i < 30; ++i) {
       articleService.createNewArticle(
-          new CreateArticleRequest(boardId1, "title0_" + i, "content" + i, userId));
+          new CreateArticleRequest(boardId1, "title0_" + i, "content" + i));
       articleService.createNewArticle(
-          new CreateArticleRequest(boardId2, "title1_" + i, "content" + i, userId));
+          new CreateArticleRequest(boardId2, "title1_" + i, "content" + i));
     }
     // When
     ListArticleResponse result = articleService.getArticlesWithBoardId(boardId1, Optional.of(1));
@@ -143,7 +143,7 @@ class ArticleServiceTest {
     Long userId = createUser();
     Long boardId = createBoard();
     CreateArticleResponse newArticle = articleService.createNewArticle(
-        new CreateArticleRequest(boardId, "title", "content", userId));
+        new CreateArticleRequest(boardId, "title", "content"));
     Long articleId = newArticle.articleId();
 
     // When

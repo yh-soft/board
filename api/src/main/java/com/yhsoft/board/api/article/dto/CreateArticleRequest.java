@@ -8,11 +8,9 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
 public record CreateArticleRequest(@NotNull Long boardId, @NotBlank @Length(max = 60) String title,
-                                   @NotBlank @Length(max = 255) String content,
-                                   // TODO: 로그인을 한 사용자 값을 자동으로 입력
-                                   Long userId) {
+                                   @NotBlank @Length(max = 255) String content) {
 
-  public ArticleEntity toEntity() {
+  public ArticleEntity toEntity(Long userId) {
     ArticleEntity entity = new ArticleEntity();
     BoardEntity boardEntity = new BoardEntity();
     boardEntity.setBoardId(boardId);

@@ -47,13 +47,12 @@ class ArticleControllerTest {
     given(articleService.createNewArticle(new CreateArticleRequest(
         1L,
         "title",
-        "content",
-        1L
+        "content"
     ))).willReturn(new CreateArticleResponse(1L, 1L));
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/article").contentType(APPLICATION_JSON).content("""
-            {"boardId": 1, "title": "title", "content": "content", "userId": 1}
+            {"boardId": 1, "title": "title", "content": "content"}
             """));
     // Then
     perform.andExpect(status().isCreated())
@@ -68,7 +67,7 @@ class ArticleControllerTest {
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/article").contentType(APPLICATION_JSON).content("""
-            {"title": "title", "content": "content", "userId": 1}
+            {"title": "title", "content": "content"}
             """));
     // Then
     perform.andExpect(status().isBadRequest());
@@ -81,7 +80,7 @@ class ArticleControllerTest {
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/article").contentType(APPLICATION_JSON).content("""
-            {"boardId": 1, "title": "%s", "content": "content", "userId": 1}
+            {"boardId": 1, "title": "%s", "content": "content"}
             """.formatted("A".repeat(61))));
     // Then
     perform.andExpect(status().isBadRequest());
@@ -94,7 +93,7 @@ class ArticleControllerTest {
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/article").contentType(APPLICATION_JSON).content("""
-            {"boardId": 1, "title": "  ", "content": "content", "userId": 1}
+            {"boardId": 1, "title": "  ", "content": "content"}
             """));
     // Then
     perform.andExpect(status().isBadRequest());
@@ -107,7 +106,7 @@ class ArticleControllerTest {
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/article").contentType(APPLICATION_JSON).content("""
-            {"boardId": 1, "title": "title", "content": "%s", "userId": 1}
+            {"boardId": 1, "title": "title", "content": "%s"}
             """.formatted("A".repeat(256))));
     // Then
     perform.andExpect(status().isBadRequest());
@@ -120,7 +119,7 @@ class ArticleControllerTest {
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/article").contentType(APPLICATION_JSON).content("""
-            {"boardId": 1, "title": "title", "content": "  ", "userId": 1}
+            {"boardId": 1, "title": "title", "content": "  "}
             """));
     // Then
     perform.andExpect(status().isBadRequest());
@@ -132,7 +131,7 @@ class ArticleControllerTest {
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/article").contentType(APPLICATION_JSON).content("""
-            {"boardId": 1, "title": "title", "content": "content", "userId": 1}
+            {"boardId": 1, "title": "title", "content": "content"}
             """));
     // Then
     perform.andExpect(status().isForbidden());
