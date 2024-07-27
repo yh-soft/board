@@ -1,5 +1,7 @@
 package com.yhsoft.board.domain.article.domain;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 import com.yhsoft.board.domain.board.domain.BoardEntity;
 import com.yhsoft.board.domain.user.domain.UserEntity;
 import jakarta.persistence.Entity;
@@ -25,7 +27,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class ArticleEntity {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = IDENTITY)
   private Long articleId;
 
   @ManyToOne(fetch = FetchType.LAZY)

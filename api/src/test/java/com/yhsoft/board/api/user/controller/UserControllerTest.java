@@ -13,16 +13,20 @@ import com.yhsoft.board.api.user.dto.LoginUserResponse;
 import com.yhsoft.board.api.user.exception.DuplicateUsernameException;
 import com.yhsoft.board.api.user.exception.LoginFailedException;
 import com.yhsoft.board.api.user.service.UserService;
+import com.yhsoft.board.security.JwtConfiguration;
+import com.yhsoft.board.security.SpringSecurityConfig;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(UserController.class)
+@Import({JwtConfiguration.class, SpringSecurityConfig.class})
 @DisplayName("UserController 테스트")
 class UserControllerTest {
 
@@ -106,14 +110,15 @@ class UserControllerTest {
   void loginUser_withValidUser_returnOk() throws Exception {
     // Given
     given(userService.loginUser(new LoginUserRequest("userA", "1234"))).willReturn(
-        new LoginUserResponse(2L));
+        new LoginUserResponse(2L, "token"));
     // When
     ResultActions perform = mockMvc.perform(
         post("/api/v1/user/login").contentType(APPLICATION_JSON).content("""
             {"username": "userA", "password": "1234"}
             """));
     // Then
-    perform.andExpect(status().isOk()).andExpect(jsonPath("$.userId").value(2L));
+    perform.andExpect(status().isOk()).andExpect(jsonPath("$.userId").value(2L))
+        .andExpect(jsonPath("$.token").value("token"));
   }
 
   @Test
